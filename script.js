@@ -1,6 +1,7 @@
 const speed = 128;                          // mario move speed
 const jumpPower = 512;                      // mario jump power
-const lifes = 3;                            // set mario health on 3
+const maxHearts = 3;                            // set mario health on 3
+const enemySpeed = 60
 let levelCfg = [                            // create a level based on symbols
     "                           ",
     "                           ",
@@ -9,7 +10,7 @@ let levelCfg = [                            // create a level based on symbols
     "                           ",
     "                           ",
     "                           ",
-    "  ***                      ",
+    "  ",
     "                           ",
     "                           ",
     "                           ",
@@ -18,11 +19,21 @@ let levelCfg = [                            // create a level based on symbols
     "                           ",
     "                           ",
     "                    ()     ",
-    "                    []     ",
+    "           !    !   []     ",
     "______________________  ___",
     "                           ",
     "                           ",
 ]
+
+function dead(hearts) {
+    hearts--;
+    if(!hearts==0) {
+        go('main', hearts);
+    }
+    else {
+        go('gameOver');
+    }
+}
 
 kaboom({
     fullscreen: true,
@@ -50,7 +61,7 @@ loadSprite('block', 'https://i.imgur.com/Kc39uFk.png');
 loadSprite('heart', 'https://i.imgur.com/a9BjaKa.png');
 loadSprite('gameOver', 'https://i.imgur.com/zdD9e1o.jpg')
 
-scene('start', () => {
+scene('start', (hearts) => {
 
     add([
         pos(10, 10),
@@ -77,18 +88,38 @@ scene('start', () => {
     ])
 
     onKeyPress('enter', () => {    
-        go('main')
+        go('main', maxHearts)
     })
 })
 
 scene('gameOver', () => {
-    drawSprite({
-        sprite: 'gameOver',
-        pos: vec2(100, 100),
-    })
+    add([
+        origin('center'),
+        pos(width()/2, height()/2),
+        text('GAME OVER', {
+            size: 48,
+            font: 'sink',
+        }), 
+    ])
+
+    add([
+        origin('center'),
+        pos(width()/2, height()/2 +32),
+        text('ENTER to close', {
+            size: 8,
+            font: 'sink',
+        }), 
+    ])
 })
 
-scene("main", () => {                    // define a scene
+scene("main", (hearts) => {                    // define a scene
+    
+    levelCfg[7] = "  ";
+
+    for(let i=hearts; i>0; i--) {
+        levelCfg[7] = levelCfg[7] + "*"
+    }
+
     addLevel(levelCfg, {
         width: 20,                       // define the size of each block
         height: 20,
@@ -145,10 +176,18 @@ scene("main", () => {                    // define a scene
             solid(),
         ],
 
+        "!": () => [
+            sprite("mushroom-rightstep"),
+            area(),
+            solid(),
+            'enemy',
+        ],
+
         "*": () => [
             sprite("heart"),
         ],
-    }) 
+    })
+    
 
     const player = add([
         sprite("mario"),               // load sprite 
@@ -158,10 +197,14 @@ scene("main", () => {                    // define a scene
     ])
 
     player.onUpdate( () => {
-        camPos(player.pos)
+        camPos(player.pos)          // center cam on mario in every frame
         if(player.pos.y >= 400) {
-            player.health--
+            dead(hearts);
         }
+    })
+
+    player.onCollide("enemy", () => {
+        dead(hearts);
     })
 
     onKeyPress("space", () => {    // jump when player press "space"
