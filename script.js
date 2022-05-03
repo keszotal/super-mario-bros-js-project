@@ -2,6 +2,28 @@ const speed = 128;                          // mario move speed
 const jumpPower = 512;                      // mario jump power
 const maxHearts = 3;                            // set mario health on 3
 const enemySpeed = 60
+const secretCfg = [                            // create a level based on symbols
+    "                           ",
+    "                           ",
+    "                           ",
+    "                           ",
+    "                           ",
+    "___________________________",
+    "_                         _",
+    "_                         _",
+    "_                         _",
+    "_                         _",
+    "_                        &_",
+    "_                      xxx_",
+    "_               o   xxxxxx_",
+    "_           xxxxxxxxxxxxxx_",
+    "_          xxxxxxxxxxxxxxx_",
+    "_         xxxxxxxxxxxxxxxx_",
+    "_        xxxxxxxxxxxxxxxxx_",
+    "___________________________",
+    "                           ",
+    "                           ",
+]
 let levelCfg = [                            // create a level based on symbols
     "                           ",
     "                           ",
@@ -24,11 +46,12 @@ let levelCfg = [                            // create a level based on symbols
     "                           ",
     "                           ",
 ]
+const startMarioPos = [30, 80]
 
-function dead(hearts) {
+function dead(hearts, secretUsed) {
     hearts--;
     if(!hearts==0) {
-        go('main', hearts);
+        go('main', startMarioPos[0], startMarioPos[1], hearts, secretUsed);
     }
     else {
         go('gameOver');
@@ -65,8 +88,8 @@ scene('start', (hearts) => {
 
     add([
         pos(10, 10),
-        text('For better experience press F11 and F5', {
-            size: 24,
+        text('Fullscreen recomended (F11) and refresh page (F5)', {
+            size: 20,
             font: 'sink',
         }), 
     ])
@@ -88,7 +111,7 @@ scene('start', (hearts) => {
     ])
 
     onKeyPress('enter', () => {    
-        go('main', maxHearts)
+        go('main', startMarioPos[0], startMarioPos[1], maxHearts)
     })
 })
 
@@ -105,14 +128,118 @@ scene('gameOver', () => {
     add([
         origin('center'),
         pos(width()/2, height()/2 +32),
-        text('ENTER to close', {
+        text('ENTER to RESTART', {
             size: 8,
             font: 'sink',
         }), 
     ])
+
+    onKeyPress('enter', () => {    
+        go('main', startMarioPos[0], startMarioPos[1], maxHearts)
+    })
 })
 
-scene("main", (hearts) => {                    // define a scene
+scene("secretRoom", (hearts) => {
+    addLevel(secretCfg, {
+        width: 20,                       // define the size of each block
+        height: 20,
+        
+        "_": () => [
+            sprite("floor-alt"),
+            area(),             // has a collider
+            solid(),            // is a static object
+        ],
+
+        "[": () => [
+            sprite("green-column-bottom-left"),
+            area(),
+            solid(),
+            scale(0.5),
+        ],
+
+        "]": () => [
+            sprite("green-column-bottom-right"),
+            area(),
+            solid(),
+            scale(0.5),
+        ],
+
+        "(": () => [
+            sprite("green-column-top-left"),
+            area(),
+            solid(),
+            scale(0.5),
+        ],
+
+        ")": () => [
+            sprite("green-column-top-right"),
+            area(),
+            solid(),
+            scale(0.5),
+        ],
+
+        "&": () => [
+            sprite("flower"),
+            area(),
+            solid(),
+            'exit',
+        ],
+
+        "x": () => [
+            sprite("block-alt"),
+            area(),
+            solid(),
+        ],
+    })
+
+    const player = add([
+        sprite("mario"),               // load sprite 
+        pos(50, 150),                   // set start position 
+        area(),                        
+        body(),                // set mario health on 3   
+    ])
+
+    const heal = add([
+        sprite("heart"),
+        pos(320, 240),
+        area(),
+        solid(),
+        'heal'
+    ])
+
+    player.onUpdate( () => {
+
+    })
+
+    player.onCollide("exit", () => {
+        go('main', 410, 280, hearts, true);
+    })
+
+    player.onCollide('heal', (heal) => {
+        destroy(heal);
+        hearts++;
+    })
+
+    onKeyPress("space", () => {    // jump when player press "space"
+        if(player.isGrounded()) {
+            player.jump(jumpPower)
+        }
+    })
+
+    onKeyPress("down", () => {    // !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+        console.log(player.pos)
+    })
+    
+    onKeyDown('left', () => {     // move to left by left_arrow
+        player.move(-speed, 0)
+    })
+
+    onKeyDown('right', () => {     // move to right by right_arrow
+        player.move(speed, 0)
+    })
+})
+
+scene("main", (posX, posY, hearts, secretUsed=false) => {                    // define a scene
     
     levelCfg[7] = "  ";
 
@@ -191,7 +318,7 @@ scene("main", (hearts) => {                    // define a scene
 
     const player = add([
         sprite("mario"),               // load sprite 
-        pos(30, 80),                   // set start position 
+        pos(posX, posY),                   // set start position 
         area(),                        
         body(),                // set mario health on 3   
     ])
@@ -199,17 +326,25 @@ scene("main", (hearts) => {                    // define a scene
     player.onUpdate( () => {
         camPos(player.pos)          // center cam on mario in every frame
         if(player.pos.y >= 400) {
-            dead(hearts);
+            dead(hearts, secretUsed);
         }
     })
 
     player.onCollide("enemy", () => {
-        dead(hearts);
+        dead(hearts, secretUsed);
     })
 
     onKeyPress("space", () => {    // jump when player press "space"
         if(player.isGrounded()) {
             player.jump(jumpPower)
+        }
+    })
+
+    onKeyPress("down", () => {    // !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+        console.log(player.pos)
+        if( player.pos.x>400 && player.pos.x<430 && player.pos.y == 280 && secretUsed == false) {
+            go('secretRoom', hearts);
+            secretUsed = true;
         }
     })
     
