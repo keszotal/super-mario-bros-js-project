@@ -81,16 +81,11 @@ scene("main", (posX, posY, hearts, secretUsed=false) => {                    // 
             solid(),            // is a static object
         ],
 
-        "o": () => [
-            sprite("coin"),
-            area(),
-            solid(),
-        ],
-
         "?": () => [
             sprite("question-mark"),
             area(),
             solid(),
+            'question-mark'
         ],
 
         "[": () => [
@@ -139,12 +134,11 @@ scene("main", (posX, posY, hearts, secretUsed=false) => {                    // 
         ],
     })
     
-
     const player = add([
         sprite("mario"),               // load sprite 
-        pos(posX, posY),                   // set start position 
+        pos(posX, posY),               // set start position 
         area(),                        
-        body(),                // set mario health on 3   
+        body(),  
     ])
 
     player.onUpdate( () => {
@@ -190,9 +184,21 @@ scene("main", (posX, posY, hearts, secretUsed=false) => {                    // 
         }), 
     ])
 
+    player.onCollide('question-mark', (obj) => {
+        if (player.pos.y>260) {
+            add([
+                sprite('mushroom-boost'),
+                pos(obj.pos.x, obj.pos.y-20),
+                area(),
+                body(),
+            ])
+            destroy(obj)
+        }
+      })
+
     onKeyPress("down", () => {    // !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
         console.log(player.pos)
-        if( player.pos.x>secretPos.x && player.pos.x<secretPos.y && player.pos.y == 280 && secretUsed == false) {
+        if( player.pos.x>secretPos.startX && player.pos.x<secretPos.endX && player.pos.y == secretPos.y && secretUsed == false) {
             go('secretRoom', hearts);
             secretUsed = true;
         }
@@ -294,7 +300,7 @@ scene("secretRoom", (hearts) => {
 
     const player = add([
         sprite("mario"),               // load sprite 
-        pos(50, 150),                   // set start position 
+        pos(50, 150),                  // set start position 
         area(),                        
         body(),                // set mario health on 3   
     ])
