@@ -1,63 +1,3 @@
-const speed = 128;                          // mario move speed
-const jumpPower = 512;                      // mario jump power
-const maxHearts = 3;                            // set mario health on 3
-const enemySpeed = 60
-const secretCfg = [                            // create a level based on symbols
-    "                           ",
-    "                           ",
-    "                           ",
-    "                           ",
-    "                           ",
-    "___________________________",
-    "_                         _",
-    "_                         _",
-    "_                         _",
-    "_                         _",
-    "_                        &_",
-    "_                      xxx_",
-    "_               o   xxxxxx_",
-    "_           xxxxxxxxxxxxxx_",
-    "_          xxxxxxxxxxxxxxx_",
-    "_         xxxxxxxxxxxxxxxx_",
-    "_        xxxxxxxxxxxxxxxxx_",
-    "___________________________",
-    "                           ",
-    "                           ",
-]
-let levelCfg = [                            // create a level based on symbols
-    "                           ",
-    "                           ",
-    "                           ",
-    "                           ",
-    "                           ",
-    "                           ",
-    "                           ",
-    "  ",
-    "                           ",
-    "                           ",
-    "                           ",
-    "                           ",
-    "    ?????                  ",
-    "                           ",
-    "                           ",
-    "                    ()     ",
-    "           !    !   []     ",
-    "______________________  ___",
-    "                           ",
-    "                           ",
-]
-const startMarioPos = [30, 80]
-
-function dead(hearts, secretUsed) {
-    hearts--;
-    if(!hearts==0) {
-        go('main', startMarioPos[0], startMarioPos[1], hearts, secretUsed);
-    }
-    else {
-        go('gameOver');
-    }
-}
-
 kaboom({
     fullscreen: true,
     background: [0, 0, 0],
@@ -84,6 +24,10 @@ loadSprite('block', 'https://i.imgur.com/Kc39uFk.png');
 loadSprite('heart', 'https://i.imgur.com/a9BjaKa.png');
 loadSprite('gameOver', 'https://i.imgur.com/zdD9e1o.jpg')
 
+
+// ***************************************************** //
+// ****************** START SCENE ********************** //
+// ***************************************************** //
 scene('start', (hearts) => {
 
     add([
@@ -109,136 +53,16 @@ scene('start', (hearts) => {
             font: 'sink',
         }), 
     ])
-
-    onKeyPress('enter', () => {    
-        go('main', startMarioPos[0], startMarioPos[1], maxHearts)
-    })
-})
-
-scene('gameOver', () => {
-    add([
-        origin('center'),
-        pos(width()/2, height()/2),
-        text('GAME OVER', {
-            size: 48,
-            font: 'sink',
-        }), 
-    ])
-
-    add([
-        origin('center'),
-        pos(width()/2, height()/2 +32),
-        text('ENTER to RESTART', {
-            size: 8,
-            font: 'sink',
-        }), 
-    ])
-
-    onKeyPress('enter', () => {    
-        go('main', startMarioPos[0], startMarioPos[1], maxHearts)
-    })
-})
-
-scene("secretRoom", (hearts) => {
-    addLevel(secretCfg, {
-        width: 20,                       // define the size of each block
-        height: 20,
-        
-        "_": () => [
-            sprite("floor-alt"),
-            area(),             // has a collider
-            solid(),            // is a static object
-        ],
-
-        "[": () => [
-            sprite("green-column-bottom-left"),
-            area(),
-            solid(),
-            scale(0.5),
-        ],
-
-        "]": () => [
-            sprite("green-column-bottom-right"),
-            area(),
-            solid(),
-            scale(0.5),
-        ],
-
-        "(": () => [
-            sprite("green-column-top-left"),
-            area(),
-            solid(),
-            scale(0.5),
-        ],
-
-        ")": () => [
-            sprite("green-column-top-right"),
-            area(),
-            solid(),
-            scale(0.5),
-        ],
-
-        "&": () => [
-            sprite("flower"),
-            area(),
-            solid(),
-            'exit',
-        ],
-
-        "x": () => [
-            sprite("block-alt"),
-            area(),
-            solid(),
-        ],
-    })
-
-    const player = add([
-        sprite("mario"),               // load sprite 
-        pos(50, 150),                   // set start position 
-        area(),                        
-        body(),                // set mario health on 3   
-    ])
-
-    const heal = add([
-        sprite("heart"),
-        pos(320, 240),
-        area(),
-        solid(),
-        'heal'
-    ])
-
-    player.onUpdate( () => {
-
-    })
-
-    player.onCollide("exit", () => {
-        go('main', 410, 280, hearts, true);
-    })
-
-    player.onCollide('heal', (heal) => {
-        destroy(heal);
-        hearts++;
-    })
-
-    onKeyPress("space", () => {    // jump when player press "space"
-        if(player.isGrounded()) {
-            player.jump(jumpPower)
-        }
-    })
-
-    onKeyPress("down", () => {    // !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-        console.log(player.pos)
-    })
     
-    onKeyDown('left', () => {     // move to left by left_arrow
-        player.move(-speed, 0)
-    })
-
-    onKeyDown('right', () => {     // move to right by right_arrow
-        player.move(speed, 0)
+    onKeyPress('enter', () => {    
+        go('main', startMarioPos[0], startMarioPos[1], maxHearts)
     })
 })
 
+
+// ***************************************************** //
+// ******************* MAIN SCENE ********************** //
+// ***************************************************** //
 scene("main", (posX, posY, hearts, secretUsed=false) => {                    // define a scene
     
     levelCfg[7] = "  ";
@@ -340,9 +164,35 @@ scene("main", (posX, posY, hearts, secretUsed=false) => {                    // 
         }
     })
 
+    // TIP FOR MR. WISNIEWSKI <3
+    add([
+        pos(420, 220),
+        origin('center'),
+        text("HERE IS SECRET ROOM", {
+            size: 8,
+            font: 'sink',
+        }), 
+    ])
+    add([
+        pos(420, 228),
+        origin('center'),
+        text("|", {
+            size: 8,
+            font: 'sink',
+        }), 
+    ])
+    add([
+        pos(420, 236),
+        origin('center'),
+        text("V", {
+            size: 8,
+            font: 'sink',
+        }), 
+    ])
+
     onKeyPress("down", () => {    // !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
         console.log(player.pos)
-        if( player.pos.x>400 && player.pos.x<430 && player.pos.y == 280 && secretUsed == false) {
+        if( player.pos.x>secretPos.x && player.pos.x<secretPos.y && player.pos.y == 280 && secretUsed == false) {
             go('secretRoom', hearts);
             secretUsed = true;
         }
@@ -354,8 +204,139 @@ scene("main", (posX, posY, hearts, secretUsed=false) => {                    // 
 
     onKeyDown('right', () => {     // move to right by right_arrow
         player.move(speed, 0)
-    })
-        
-});
+    })  
+})
 
-go("start");
+
+// ***************************************************** //
+// ******************* GAME OVER *********************** //
+// ***************************************************** //
+    scene('gameOver', () => {
+        add([
+            origin('center'),
+            pos(width()/2, height()/2),
+            text('GAME OVER', {
+                size: 48,
+                font: 'sink',
+            }), 
+        ])
+        
+        add([
+            origin('center'),
+            pos(width()/2, height()/2 +32),
+            text('ENTER to RESTART', {
+                size: 8,
+                font: 'sink',
+            }), 
+    ])
+
+    onKeyPress('enter', () => {    
+        go('main', startMarioPos[0], startMarioPos[1], maxHearts)
+    })
+})
+
+
+// ***************************************************** //
+// *************** ??? SECRET ROOM ??? ***************** //
+// ***************************************************** //
+scene("secretRoom", (hearts) => {
+    addLevel(secretCfg, {
+        width: 20,                       // define the size of each block
+        height: 20,
+        
+        "_": () => [
+            sprite("floor-alt"),
+            area(),             // has a collider
+            solid(),            // is a static object
+        ],
+
+        "[": () => [
+            sprite("green-column-bottom-left"),
+            area(),
+            solid(),
+            scale(0.5),
+        ],
+
+        "]": () => [
+            sprite("green-column-bottom-right"),
+            area(),
+            solid(),
+            scale(0.5),
+        ],
+
+        "(": () => [
+            sprite("green-column-top-left"),
+            area(),
+            solid(),
+            scale(0.5),
+        ],
+
+        ")": () => [
+            sprite("green-column-top-right"),
+            area(),
+            solid(),
+            scale(0.5),
+        ],
+
+        "&": () => [
+            sprite("flower"),
+            area(),
+            solid(),
+            'exit',
+        ],
+
+        "x": () => [
+            sprite("block-alt"),
+            area(),
+            solid(),
+        ],
+    })
+
+    const player = add([
+        sprite("mario"),               // load sprite 
+        pos(50, 150),                   // set start position 
+        area(),                        
+        body(),                // set mario health on 3   
+    ])
+
+    const heal = add([
+        sprite("heart"),
+        pos(320, 240),
+        area(),
+        solid(),
+        'heal'
+    ])
+
+    player.onUpdate( () => {
+
+    })
+
+    player.onCollide("exit", () => {
+        go('main', 410, 280, hearts, true);
+    })
+
+    player.onCollide('heal', (heal) => {
+        destroy(heal);
+        hearts++;
+    })
+
+    onKeyPress("space", () => {    // jump when player press "space"
+        if(player.isGrounded()) {
+            player.jump(jumpPower)
+        }
+    })
+
+    onKeyPress("down", () => {    // !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+        console.log(player.pos)
+    })
+    
+    onKeyDown('left', () => {     // move to left by left_arrow
+        player.move(-speed, 0)
+    })
+
+    onKeyDown('right', () => {     // move to right by right_arrow
+        player.move(speed, 0)
+    })
+})
+
+go("start");                  // JUST STARTING GAME
