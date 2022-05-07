@@ -7,7 +7,13 @@ const secretPos = {                         // secret room coords [x, y]
     startX: 390,
     endX: 440,
     y: 280,
-};                
+};   
+const goTo2Lvl = {
+    startX: 585,
+    endX: 635,
+    y: 280,
+}    
+const bigMarioTime = 5000                   // time in ms (5000 = 5sec)        
 
 let levelCfg = [                            // create a level based on symbols
     "",          // DO 
@@ -22,14 +28,37 @@ let levelCfg = [                            // create a level based on symbols
     "                                                   ",
     "                                                   ",
     "                                                   ",
-    "     %                                             ",
+    "                                                   ",
     "     ?                                            ",
     "                                                   ",
-    "                    ()                             ",
-    "           !    !   []                             ",
-    "___________________________________________________",
+    "                    ()        ()                   ",
+    "               !   ![]        []                   ",
+    "______________________   __________________________",
     "                                                   ",
     "                                                   ",
+];
+
+const level2Cfg = [                            // create a level based on symbols
+"",          // DO 
+"",          // NOT
+"",          // EDIT
+"",          // THIS
+"",          // SPACE
+"",          // ...
+"",          // STILL
+"  ",        // ...
+"                                                   ",          // <- HERE YOU CAN EDIT
+"                                                   ",
+"                                                   ",
+"                                                   ",
+"                                                   ",
+"                                                   ",
+"                                                   ",
+"                                                   ",
+"                                                   ",
+"___________________________________________________",
+"                                                   ",
+"                                                   ",
 ];
 
 const secretCfg = [                            // create a level based on symbols
