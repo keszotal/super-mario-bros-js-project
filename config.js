@@ -38,7 +38,7 @@ let levelCfg = [                            // create a level based on symbols
     "                                                   ",
 ];
 
-const level2Cfg = [                            // create a level based on symbols
+let level2Cfg = [                            // create a level based on symbols
 "",          // DO 
 "",          // NOT
 "",          // EDIT
