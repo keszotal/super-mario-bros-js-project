@@ -1,7 +1,7 @@
-function dead(hearts, secretUsed) {
+function dead(scene, cfg, hearts, secretUsed) {
     hearts--;
     if(!hearts==0) {
-        go('main', levelCfg, startMarioPos[0], startMarioPos[1], hearts, secretUsed);
+        go(scene, cfg, startMarioPos.x, startMarioPos.y, hearts, secretUsed);
     }
     else {
         go('gameOver');
@@ -9,8 +9,8 @@ function dead(hearts, secretUsed) {
 }
 
 function makeBig(obj) {
-    obj.scale = 2
     obj.pos = obj.pos
+    obj.scale = 2
 
     setTimeout(() => {
        obj.scale = 1 

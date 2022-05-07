@@ -54,7 +54,7 @@ scene('start', (hearts) => {
     ])
     
     onKeyPress('enter', () => {    
-        go('main', levelCfg, startMarioPos[0], startMarioPos[1], maxHearts)
+        go('main', levelCfg, startMarioPos.x, startMarioPos.y, maxHearts)
     })
 })
 
@@ -64,10 +64,10 @@ scene('start', (hearts) => {
 // ***************************************************** //
 scene("main", (cfg, posX, posY, hearts, secretUsed=false) => {                    // define a scene
     
-    cfg[7] = "  ";
+    cfg[6] = "  ";
 
     for(let i=hearts; i>0; i--) {
-        cfg[7] = cfg[7] + "*"
+        cfg[6] = cfg[6] + "*"
     }
 
     addLevel(levelCfg, {
@@ -130,7 +130,10 @@ scene("main", (cfg, posX, posY, hearts, secretUsed=false) => {                  
 
         "*": () => [
             sprite("heart"),
-        ],
+            area(),
+            solid(),
+            'heal',
+        ]
     })
     
     const player = add([
@@ -144,7 +147,7 @@ scene("main", (cfg, posX, posY, hearts, secretUsed=false) => {                  
     player.onUpdate( () => {
         camPos(player.pos)          // center cam on mario in every frame
         if(player.pos.y >= 400) {
-            dead(hearts, secretUsed);
+            dead('main', levelCfg, hearts, secretUsed);
         }
     })
 
@@ -174,7 +177,6 @@ scene("main", (cfg, posX, posY, hearts, secretUsed=false) => {                  
             font: 'sink',
         }), 
     ])
-    
 
     player.onCollide('question-mark', (obj) => {
         if (player.pos.y>obj.pos.y+19.5) {
@@ -194,7 +196,7 @@ scene("main", (cfg, posX, posY, hearts, secretUsed=false) => {                  
             enemy.destroy();
         }
         else {
-            dead(hearts, secretUsed);
+            dead('main', levelCfg, hearts, secretUsed);
         }
     })
     
@@ -211,14 +213,26 @@ scene("main", (cfg, posX, posY, hearts, secretUsed=false) => {                  
         destroy(obj)
     })
 
+    player.onCollide('heal', (heal) => {
+        destroy(heal);
+        hearts++;
+        add([
+            sprite("heart"),
+            pos(20, 120),
+            area(),
+            solid(),
+            'heal',
+        ])
+    })
+
     onKeyPress("down", () => {    // !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
         console.log(player.pos)
         if( player.pos.x>secretPos.startX && player.pos.x<secretPos.endX && player.pos.y <= secretPos.y && secretUsed == false) {
-            go('secretRoom', secretCfg, hearts);
+            go('secretRoom', secretCfg, hearts, 'main', levelCfg);
             secretUsed = true;
         }
         if( player.pos.x>goTo2Lvl.startX && player.pos.x<goTo2Lvl.endX && player.pos.y <= goTo2Lvl.y) {
-            go('level2', level2Cfg, hearts);
+            go('level2', level2Cfg, startMarioPos.x, startMarioPos.y, hearts);
         }
     })
     
@@ -240,12 +254,12 @@ scene("main", (cfg, posX, posY, hearts, secretUsed=false) => {                  
 // ***************************************************** //
 // ********************* LVL 2 ************************* //
 // ***************************************************** //
-scene("level2", (cfg, hearts) => {
+scene("level2", (cfg, posX, posY, hearts, secretUsed=false) => {
 
-    cfg[7] = "  ";
+    cfg[6] = "  ";
 
     for(let i=hearts; i>0; i--) {
-        cfg[7] = cfg[7] + "*"
+        cfg[6] = cfg[6] + "*"
     }
 
     addLevel(cfg, {
@@ -253,9 +267,16 @@ scene("level2", (cfg, hearts) => {
         height: 20,
         
         "_": () => [
-            sprite("floor-alt"),
+            sprite("floor"),
             area(),             // has a collider
             solid(),            // is a static object
+        ],
+
+        "?": () => [
+            sprite("question-mark"),
+            area(),
+            solid(),
+            'question-mark'
         ],
 
         "[": () => [
@@ -286,29 +307,250 @@ scene("level2", (cfg, hearts) => {
             scale(0.5),
         ],
 
-        "&": () => [
-            sprite("flower"),
+        "x": () => [
+            sprite("green-column-top-right"),
             area(),
             solid(),
-            'exit',
         ],
 
-        "x": () => [
-            sprite("block-alt"),
+        "!": () => [
+            sprite("mushroom-enemy"),
+            area(),
+            body(),
+            'enemy',
+        ],
+
+        "*": () => [
+            sprite("heart"),
             area(),
             solid(),
-        ],
+            'heal',
+        ]
     })
 
     const player = add([
         sprite("mario"),               // load sprite 
-        pos(50, 150),                  // set start position 
+        pos(posX, posY),               // set start position 
         area(),                        
         body(),                // set mario health on 3   
     ])
 
     player.onUpdate( () => {
+        camPos(player.pos)          // center cam on mario in every frame
+        if(player.pos.y >= 400) {
+            dead('level2', level2Cfg, hearts, secretUsed);
+        }
+    })
 
+    player.onCollide("enemy", (enemy) => { 
+        if(!player.isGrounded() || player.boss == true) {
+            enemy.destroy();
+        }
+        else {
+            dead('level2', level2Cfg, hearts, secretUsed);
+        }
+    })
+    
+    action('enemy', (enemy) => {
+        enemy.move(-enemySpeed, 0)
+    })
+
+    player.onCollide('question-mark', (obj) => {
+        if (player.pos.y>obj.pos.y+19.5) {
+            add([
+                sprite('mushroom-boost'),
+                pos(obj.pos.x, obj.pos.y-20),
+                area(),
+                body(),
+                "mushroom-boost",
+            ])
+            destroy(obj)
+        }
+    })
+    
+    player.onCollide('mushroom-boost', (obj) => {
+        let position = obj.pos
+        makeBig(player)
+        player.pos = position
+        player.boss = true
+        
+        destroy(obj)
+    })
+
+    player.onCollide('heal', (heal) => {
+        destroy(heal);
+        hearts++;
+        add([
+            sprite("heart"),
+            pos(20, 120),
+            area(),
+            solid(),
+            'heal',
+        ])
+    })
+
+    onKeyPress("space", () => {    // jump when player press "space"
+        if(player.isGrounded()) {
+            player.jump(jumpPower)
+        }
+    })
+
+    onKeyPress("down", () => {    // !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+        console.log(player.pos)
+        if( player.pos.x>secret2Pos.startX && player.pos.x<secret2Pos.endX && player.pos.y <= secret2Pos.y && secretUsed == false) {
+            go('secretRoom', secretCfg, hearts, 'level2', level2Cfg);
+            secretUsed = true;
+        }
+        if( player.pos.x>goTo3Lvl.startX && player.pos.x<goTo3Lvl.endX && player.pos.y <= goTo3Lvl.y) {
+            go('level3', level3Cfg, startMarioPos.x, startMarioPos.y, hearts);
+        }
+    })
+    
+    onKeyDown('left', () => {     // move to left by left_arrow
+        player.move(-speed, 0)
+    })
+
+    onKeyDown('right', () => {     // move to right by right_arrow
+        player.move(speed, 0)
+    })
+})
+
+// ***************************************************** //
+// ********************* LVL 3 ************************* //
+// ***************************************************** //
+scene("level3", (cfg, posX, posY, hearts, secretUsed=false) => {
+
+    cfg[6] = "  ";
+
+    for(let i=hearts; i>0; i--) {
+        cfg[6] = cfg[6] + "*"
+    }
+
+    addLevel(cfg, {
+        width: 20,                       // define the size of each block
+        height: 20,
+        
+        "_": () => [
+            sprite("floor"),
+            area(),             // has a collider
+            solid(),            // is a static object
+        ],
+
+        "?": () => [
+            sprite("question-mark"),
+            area(),
+            solid(),
+            'question-mark'
+        ],
+
+        "[": () => [
+            sprite("green-column-bottom-left"),
+            area(),
+            solid(),
+            scale(0.5),
+        ],
+
+        "]": () => [
+            sprite("green-column-bottom-right"),
+            area(),
+            solid(),
+            scale(0.5),
+        ],
+
+        "(": () => [
+            sprite("green-column-top-left"),
+            area(),
+            solid(),
+            scale(0.5),
+        ],
+
+        ")": () => [
+            sprite("green-column-top-right"),
+            area(),
+            solid(),
+            scale(0.5),
+        ],
+
+        "x": () => [
+            sprite("green-column-top-right"),
+            area(),
+            solid(),
+        ],
+
+        "!": () => [
+            sprite("mushroom-enemy"),
+            area(),
+            body(),
+            'enemy',
+        ],
+
+        "*": () => [
+            sprite("heart"),
+            area(),
+            solid(),
+            'heal',
+        ]
+    })
+
+    const player = add([
+        sprite("mario"),               // load sprite 
+        pos(posX, posY),               // set start position 
+        area(),                        
+        body(),                // set mario health on 3   
+    ])
+
+    player.onUpdate( () => {
+        camPos(player.pos)          // center cam on mario in every frame
+        if(player.pos.y >= 400) {
+            dead('level3', level3Cfg, hearts, secretUsed);
+        }
+    })
+
+    player.onCollide("enemy", (enemy) => { 
+        if(!player.isGrounded() || player.boss == true) {
+            enemy.destroy();
+        }
+        else {
+            dead('level3', level3Cfg, hearts, secretUsed);
+        }
+    })
+    
+    action('enemy', (enemy) => {
+        enemy.move(-enemySpeed, 0)
+    })
+
+    player.onCollide('question-mark', (obj) => {
+        if (player.pos.y>obj.pos.y+19.5) {
+            add([
+                sprite('mushroom-boost'),
+                pos(obj.pos.x, obj.pos.y-20),
+                area(),
+                body(),
+                "mushroom-boost",
+            ])
+            destroy(obj)
+        }
+    })
+    
+    player.onCollide('mushroom-boost', (obj) => {
+        let position = obj.pos
+        makeBig(player)
+        player.pos = position
+        player.boss = true
+        
+        destroy(obj)
+    })
+
+    player.onCollide('heal', (heal) => {
+        destroy(heal);
+        hearts++;
+        add([
+            sprite("heart"),
+            pos(20, 120),
+            area(),
+            solid(),
+            'heal',
+        ])
     })
 
     onKeyPress("space", () => {    // jump when player press "space"
@@ -353,7 +595,7 @@ scene("level2", (cfg, hearts) => {
     ])
 
     onKeyPress('enter', () => {    
-        go('main', startMarioPos[0], startMarioPos[1], maxHearts)
+        go('main', levelCfg, startMarioPos.x, startMarioPos.y, maxHearts)
     })
 })
 
@@ -361,7 +603,7 @@ scene("level2", (cfg, hearts) => {
 // ***************************************************** //
 // *************** ??? SECRET ROOM ??? ***************** //
 // ***************************************************** //
-scene("secretRoom", (cfg, hearts) => {
+scene("secretRoom", (cfg, hearts, level, levelCfg) => {
     addLevel(cfg, {
         width: 20,                       // define the size of each block
         height: 20,
@@ -412,6 +654,13 @@ scene("secretRoom", (cfg, hearts) => {
             area(),
             solid(),
         ],
+
+        "*": () => [
+            sprite("heart"),
+            area(),
+            solid(),
+            'heal',
+        ]
     })
 
     const player = add([
@@ -421,20 +670,12 @@ scene("secretRoom", (cfg, hearts) => {
         body(),                // set mario health on 3   
     ])
 
-    const heal = add([
-        sprite("heart"),
-        pos(320, 240),
-        area(),
-        solid(),
-        'heal'
-    ])
-
     player.onUpdate( () => {
 
     })
 
     player.onCollide("exit", () => {
-        go('main', levelCfg, 410, 280, hearts, true);
+        go(level, levelCfg, 410, 280, hearts, true);
     })
 
     player.onCollide('heal', (heal) => {
