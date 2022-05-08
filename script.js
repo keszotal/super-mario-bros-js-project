@@ -23,6 +23,7 @@ loadSprite('block', 'https://i.imgur.com/Kc39uFk.png');
 loadSprite('heart', 'https://i.imgur.com/a9BjaKa.png');
 loadSprite('gameOver', 'https://i.imgur.com/zdD9e1o.jpg')
 
+var startTime = Date.now()
 
 // ***************************************************** //
 // ****************** START SCENE ********************** //
@@ -146,7 +147,7 @@ scene("main", (cfg, posX, posY, hearts, secretUsed=false) => {                  
 
     player.onUpdate( () => {
         camPos(player.pos)          // center cam on mario in every frame
-        if(player.pos.y >= 400) {
+        if(player.pos.y >= 500) {
             dead('main', levelCfg, hearts, secretUsed);
         }
     })
@@ -337,7 +338,7 @@ scene("level2", (cfg, posX, posY, hearts, secretUsed=false) => {
 
     player.onUpdate( () => {
         camPos(player.pos)          // center cam on mario in every frame
-        if(player.pos.y >= 400) {
+        if(player.pos.y >= 500) {
             dead('level2', level2Cfg, hearts, secretUsed);
         }
     })
@@ -501,7 +502,7 @@ scene("level3", (cfg, posX, posY, hearts, secretUsed=false) => {
 
     player.onUpdate( () => {
         camPos(player.pos)          // center cam on mario in every frame
-        if(player.pos.y >= 400) {
+        if(player.pos.y >= 500) {
             dead('level3', level3Cfg, hearts, secretUsed);
         }
     })
@@ -561,6 +562,9 @@ scene("level3", (cfg, posX, posY, hearts, secretUsed=false) => {
 
     onKeyPress("down", () => {    // !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
         console.log(player.pos)
+        if( player.pos.x>endGamePos.startX && player.pos.x<endGamePos.endX && player.pos.y <= endGamePos.y) {
+            go('endGame');
+        }
     })
     
     onKeyDown('left', () => {     // move to left by left_arrow
@@ -700,6 +704,50 @@ scene("secretRoom", (cfg, hearts, level, levelCfg) => {
     onKeyDown('right', () => {     // move to right by right_arrow
         player.move(speed, 0)
     })
+})
+
+// ***************************************************** //
+// ******************* END GAME ************************ //
+// ***************************************************** //
+scene('endGame', () => {
+    var audio = new Audio('soundtrack.mp3')
+    audio.play()
+
+    // converting time in ms to m:s format [10:15]
+    var endTime = Date.now()
+    var playTime = endTime - startTime
+    let seconds = Math.floor(playTime / 1000);
+    let minutes = Math.floor(seconds / 60);
+    seconds = seconds % 60;
+    minutes = minutes % 60;
+
+    add([
+        origin('center'),
+        pos(width()/2, height()/2),
+        text('WINNER', {
+            size: 48,
+            font: 'sink',
+        }), 
+    ])
+    
+    add([
+        origin('center'),
+        pos(width()/2, height()/2 +32),
+        text('SOUND ON!', {
+            size: 8,
+            font: 'sink',
+        }), 
+    ])
+
+    add([
+        origin('center'),
+        pos(width()/2, height()/2 +64),
+        text(`Play time: ${minutes}:${seconds}`, {
+            size: 8,
+            font: 'sink',
+        }), 
+    ])
+
 })
 
 go("start");                  // JUST STARTING GAME

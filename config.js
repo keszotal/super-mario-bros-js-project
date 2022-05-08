@@ -3,7 +3,7 @@ const jumpPower = 512;                      // set mario jump power
 const startMarioPos = {
     x: 5, 
     y: 280,
-};             // set mario start position
+};                                          // set mario start position
 const maxHearts = 3;                        // set mario health on 3
 const enemySpeed = 60;                      // set little annoying creatures speed
 const secretPos = {                         // secret room coords [x, y]
@@ -27,6 +27,11 @@ const goTo3Lvl = {
     y: 160,
 }    
 const bigMarioTime = 5000                   // time in ms (5000 = 5sec)        
+const endGamePos = {
+    startX: 840,
+    endX: 900,
+    y: 160,
+}
 
 let levelCfg = [                            // create a level based on symbols
     "",          // DO 
@@ -87,16 +92,16 @@ const level3Cfg = [
     "                                                      ",       
     "                                           ()         ",          
     "   *                                       []         ",
-    "   _ _                             _   _______        ",
+    "   _ _                             _    ______        ",
     "                         _       __                   ",
-    "         _          __     ___                        ",
+    "         _          __     ___         _              ",
     "              ____                                    ",
     "           _                                          ",
-    "   ?   _   _                                          ",
-    "           _           !    !           !             ",
+    "   ?   _                                              ",
+    "                       !    !           !             ",
     "                                                      ",
     "                                                      ",
-    "__________________________________________________    ",
+    "__  __  __  __  __  __  __  __  __  __  __  __  __    ",
 ];
 
 const secretCfg = [                            // create a level based on symbols
