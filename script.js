@@ -23,21 +23,12 @@ loadSprite('block', 'https://i.imgur.com/Kc39uFk.png');
 loadSprite('heart', 'https://i.imgur.com/a9BjaKa.png');
 loadSprite('gameOver', 'https://i.imgur.com/zdD9e1o.jpg')
 
-var startTime = Date.now()
+var startTime
 
 // ***************************************************** //
 // ****************** START SCENE ********************** //
 // ***************************************************** //
-scene('start', (hearts) => {
-
-    add([
-        pos(10, 10),
-        text('Fullscreen recomended (F11) and refresh page (F5)', {
-            size: 20,
-            font: 'sink',
-        }), 
-    ])
-
+scene('start', () => {
     add([
         pos(100, 100),
         text('ENTER to continue', {
@@ -45,7 +36,7 @@ scene('start', (hearts) => {
             font: 'sink',
         }), 
     ])
-
+    
     add([
         pos(100, 125),
         text("if doesn't work you need mouse right-click", {
@@ -55,6 +46,7 @@ scene('start', (hearts) => {
     ])
     
     onKeyPress('enter', () => {    
+        startTime = Date.now()
         go('main', levelCfg, startMarioPos.x, startMarioPos.y, maxHearts)
     })
 })
@@ -152,12 +144,11 @@ scene("main", (cfg, posX, posY, hearts, secretUsed=false) => {                  
         }
     })
 
-    
-    // TIP FOR MR. WISNIEWSKI <3
+    // TIP FOR SECRET ROOM
     add([
         pos(420, 220),
         origin('center'),
-        text("HERE IS SECRET ROOM", {
+        text("Use DOWN ARROW to enter secret room", {
             size: 8,
             font: 'sink',
         }), 
@@ -178,17 +169,30 @@ scene("main", (cfg, posX, posY, hearts, secretUsed=false) => {                  
             font: 'sink',
         }), 
     ])
+    add([
+        pos(620, 250),
+        origin('center'),
+        text("NEXT LEVEL", {
+            size: 8,
+            font: 'sink',
+        }), 
+    ])
 
     player.onCollide('question-mark', (obj) => {
         if (player.pos.y>obj.pos.y+19.5) {
-            add([
+            var boost = add([
                 sprite('mushroom-boost'),
-                pos(obj.pos.x, obj.pos.y-20),
+                pos(obj.pos.x, obj.pos.y-50),
                 area(),
                 body(),
                 "mushroom-boost",
             ])
             destroy(obj)
+            boost.onUpdate( () => {
+                if(boost.isGrounded()) {
+                    destroy(boost)
+                }
+            })
         }
     })
     
@@ -206,12 +210,11 @@ scene("main", (cfg, posX, posY, hearts, secretUsed=false) => {                  
     })
     
     player.onCollide('mushroom-boost', (obj) => {
-        let position = obj.pos
+        var position = obj.pos
         makeBig(player)
-        player.pos = position
         player.boss = true
-        
         destroy(obj)
+        player.pos = position
     })
 
     player.onCollide('heal', (heal) => {
@@ -226,8 +229,7 @@ scene("main", (cfg, posX, posY, hearts, secretUsed=false) => {                  
         ])
     })
 
-    onKeyPress("down", () => {    // !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-        console.log(player.pos)
+    onKeyPress("down", () => {   
         if( player.pos.x>secretPos.startX && player.pos.x<secretPos.endX && player.pos.y <= secretPos.y && secretUsed == false) {
             go('secretRoom', secretCfg, hearts, 'main', levelCfg);
             secretUsed = true;
@@ -358,24 +360,28 @@ scene("level2", (cfg, posX, posY, hearts, secretUsed=false) => {
 
     player.onCollide('question-mark', (obj) => {
         if (player.pos.y>obj.pos.y+19.5) {
-            add([
+            var boost = add([
                 sprite('mushroom-boost'),
-                pos(obj.pos.x, obj.pos.y-20),
+                pos(obj.pos.x, obj.pos.y-50),
                 area(),
                 body(),
                 "mushroom-boost",
             ])
             destroy(obj)
+            boost.onUpdate( () => {
+                if(boost.isGrounded()) {
+                    destroy(boost)
+                }
+            })
         }
     })
     
     player.onCollide('mushroom-boost', (obj) => {
         let position = obj.pos
         makeBig(player)
-        player.pos = position
         player.boss = true
-        
         destroy(obj)
+        player.pos = position
     })
 
     player.onCollide('heal', (heal) => {
@@ -396,8 +402,7 @@ scene("level2", (cfg, posX, posY, hearts, secretUsed=false) => {
         }
     })
 
-    onKeyPress("down", () => {    // !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-        console.log(player.pos)
+    onKeyPress("down", () => {
         if( player.pos.x>secret2Pos.startX && player.pos.x<secret2Pos.endX && player.pos.y <= secret2Pos.y && secretUsed == false) {
             go('secretRoom', secretCfg, hearts, 'level2', level2Cfg);
             secretUsed = true;
@@ -522,24 +527,28 @@ scene("level3", (cfg, posX, posY, hearts, secretUsed=false) => {
 
     player.onCollide('question-mark', (obj) => {
         if (player.pos.y>obj.pos.y+19.5) {
-            add([
+            var boost = add([
                 sprite('mushroom-boost'),
-                pos(obj.pos.x, obj.pos.y-20),
+                pos(obj.pos.x, obj.pos.y-50),
                 area(),
                 body(),
                 "mushroom-boost",
             ])
             destroy(obj)
+            boost.onUpdate( () => {
+                if(boost.isGrounded()) {
+                    destroy(boost)
+                }
+            })
         }
     })
     
     player.onCollide('mushroom-boost', (obj) => {
         let position = obj.pos
         makeBig(player)
-        player.pos = position
         player.boss = true
-        
         destroy(obj)
+        player.pos = position
     })
 
     player.onCollide('heal', (heal) => {
@@ -560,8 +569,7 @@ scene("level3", (cfg, posX, posY, hearts, secretUsed=false) => {
         }
     })
 
-    onKeyPress("down", () => {    // !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-        console.log(player.pos)
+    onKeyPress("down", () => {    
         if( player.pos.x>endGamePos.startX && player.pos.x<endGamePos.endX && player.pos.y <= endGamePos.y) {
             go('endGame');
         }
@@ -598,7 +606,8 @@ scene("level3", (cfg, posX, posY, hearts, secretUsed=false) => {
             }), 
     ])
 
-    onKeyPress('enter', () => {    
+    onKeyPress('enter', () => { 
+        startTime = Date.now()   
         go('main', levelCfg, startMarioPos.x, startMarioPos.y, maxHearts)
     })
 })
@@ -691,10 +700,6 @@ scene("secretRoom", (cfg, hearts, level, levelCfg) => {
         if(player.isGrounded()) {
             player.jump(jumpPower)
         }
-    })
-
-    onKeyPress("down", () => {    // !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-        console.log(player.pos)
     })
     
     onKeyDown('left', () => {     // move to left by left_arrow

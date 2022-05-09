@@ -9,10 +9,13 @@ function dead(scene, cfg, hearts, secretUsed) {
 }
 
 function makeBig(obj) {
-    obj.pos = obj.pos
     obj.scale = 2
 
     setTimeout(() => {
        obj.scale = 1 
     }, bigMarioTime);
+}
+
+function refreshPosition(obj, position) {
+    obj.position = position
 }
